@@ -15,7 +15,6 @@ public class Main {
   private static int port = 50505;
 
   private static boolean keepRunning = true;
-  private static String output;
 
   public static void main(String[] args) {
 
@@ -48,6 +47,10 @@ public class Main {
           }
         }
       }
+    } catch (java.net.UnknownHostException uh) {
+      System.err.println("Could not connect to host '" + host + "', please verify the name and try again.");
+//      uh.printStackTrace();
+      System.exit(-1);
     } catch (java.io.IOException ex) {
       System.err.println("Error setting up network:");
       ex.printStackTrace();
@@ -60,12 +63,25 @@ public class Main {
     for (int i = 0; i < args.length; i++) {
       switch (args[i]) {
         case ("-host") -> {
+          if ((i + 1) >= args.length) {
+            System.out.println("-host parameter needs hostname");
+            showUsage();
+          }
           host = args[i + 1];
-          System.out.println("  Set host to " + host);
+          System.out.println("  Set host to '" + host + "'");
           i++;
         }
         case ("-port") -> {
-          port = Integer.parseInt(args[i + 1]);
+          if ((i + 1) >= args.length) {
+            System.out.println("-port parameter needs port number");
+            showUsage();
+          }
+          try {
+            port = Integer.parseInt(args[i + 1]);
+          } catch (Exception ex) {
+            System.out.println("Invalid port number '" + args[i + 1] + "'");
+            showUsage();
+          }
           System.out.println("  Set port to " + port);
           i++;
         }
@@ -79,7 +95,7 @@ public class Main {
 
   private static void showUsage() {
     System.out.println("""
-            Usage: java -jar server.jar [options]
+            Usage: java -jar client-<VERSION>.jar [options]
               where [options] are:
               
               -host <hostname> - hostname to connect to (required)
